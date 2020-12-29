@@ -8,5 +8,6 @@
 	- az input dolgok csak akkor működnek, ha a Steam is fut
 	- nem működött a VSCode-ban a kód kiegészítés...
 		- a VSCode output ablakban látszott, hogy nem tudta betölteni valami proj fájlokat, de ott volt a megoldás, hogy töltsem le a .NET SDK Framework 4.7.1-et, letöltöttem install, logoff/logon és ment :)
+	- hihetetlen, de a navSphere irányítás rotáción kívül megvan :)
 
 

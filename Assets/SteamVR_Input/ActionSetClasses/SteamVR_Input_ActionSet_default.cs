@@ -121,6 +121,22 @@ namespace Valve.VR
             }
         }
         
+        public virtual SteamVR_Action_Boolean navSphereLeft
+        {
+            get
+            {
+                return SteamVR_Actions.default_navSphereLeft;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean navSphereRight
+        {
+            get
+            {
+                return SteamVR_Actions.default_navSphereRight;
+            }
+        }
+        
         public virtual SteamVR_Action_Vibration Haptic
         {
             get

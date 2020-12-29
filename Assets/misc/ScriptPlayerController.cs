@@ -17,6 +17,7 @@ public class ScriptPlayerController : MonoBehaviour
         Vector3 directionOnPlane = Vector3.ProjectOnPlane(direction, Vector3.up);
         transform.position += Time.deltaTime * directionOnPlane;
 
+
         if ( inputJump.stateDown==true )
         {
             Debug.Log( string.Format( "inputJump.stateDown before x:{0} directionOnPlane.x:{1}",transform.position.x,directionOnPlane.x ) );

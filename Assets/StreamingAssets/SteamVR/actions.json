@@ -58,6 +58,14 @@
       "type": "boolean"
     },
     {
+      "name": "/actions/default/in/navSphereLeft",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/navSphereRight",
+      "type": "boolean"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration"
     },
@@ -175,7 +183,9 @@
       "/actions/default/in/SnapTurnLeft": "Snap Turn (Left)",
       "/actions/default/in/SnapTurnRight": "Snap Turn (Right)",
       "/actions/default/in/TouchPad": "TouchPad",
-      "/actions/default/in/jump1": "jump1"
+      "/actions/default/in/jump1": "jump1",
+      "/actions/default/in/navSphereLeft": "navSphereLeft",
+      "/actions/default/in/navSphereRight": "navSphereRight"
     }
   ]
 }
