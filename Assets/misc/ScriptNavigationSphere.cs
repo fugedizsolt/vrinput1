@@ -27,7 +27,7 @@ public class ScriptNavigationSphere : MonoBehaviour
     void Update()
     {
         // az irányításhoz az kell, hogy a chaperone-hoz viszonyítva kapjam meg, így tudom csak jól számolni a gyorsulás értékeket, még ha körbenézek is
-        if ( inputNavSphereLeftStart.state==true && inputNavSphereRightStart.state==true )
+        //if ( inputNavSphereLeftStart.state==true && inputNavSphereRightStart.state==true )
         {
             if ( this.status==0 )
                 countUpdates = 0;
@@ -116,8 +116,9 @@ public class ScriptNavigationSphere : MonoBehaviour
                 // ez is van: https://answers.unity.com/questions/35541/problem-finding-relative-rotation-from-one-quatern.html                
                 Quaternion quatTmp1 = Quaternion.Inverse( this.quatNavSphereCenterStart ) * quatNavSphere;
                 if ( countUpdates%50==0 ) Debug.Log( string.Format( "quatTmp1 ({0},{1},{2},{3})",quatTmp1.x,quatTmp1.y,quatTmp1.z,quatTmp1.w ) );
+                Vector3 anglesNavSphere = quatNavSphere.eulerAngles;
 
-                Quaternion quatTmp2 = Quaternion.Lerp( Quaternion.identity,quatNavSphere,deltaTime/10f );
+                Quaternion quatTmp2 = Quaternion.Lerp( Quaternion.identity,quatTmp1,deltaTime/10f );
                 if ( countUpdates%50==0 ) Debug.Log( string.Format( "quatTmp2 ({0},{1},{2},{3})",quatTmp2.x,quatTmp2.y,quatTmp2.z,quatTmp2.w ) );
 
                 this.transform.rotation *= quatTmp2;
@@ -132,9 +133,9 @@ public class ScriptNavigationSphere : MonoBehaviour
                 this.transform.position += vecRight * velocityRight * deltaTime;
             }
         }
-        else
-        {
-            this.status = 0;
-        }
+        //else
+        //{
+        //    this.status = 0;
+        //}
     }
 }
