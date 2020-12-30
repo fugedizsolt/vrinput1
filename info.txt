@@ -10,4 +10,23 @@
 		- a VSCode output ablakban látszott, hogy nem tudta betölteni valami proj fájlokat, de ott volt a megoldás, hogy töltsem le a .NET SDK Framework 4.7.1-et, letöltöttem install, logoff/logon és ment :)
 	- hihetetlen, de a navSphere irányítás rotáción kívül megvan :)
 
-
+20201230:
+	- végre sikerült kitalálni, hogy kell a rotation-t kiszámolni
+	- nagyot lendített, hogy készítettem egy debug canvas-t nagy nehezen a VR GUI-hoz :)
+	- van még baj
+		- a chaperone-nak tudom állítani a rotation értékét, a vrcamera-nak nem, mert azt a hmd mozgatja... :)
+		- ha viszont chaperone rotation értékét állítom, akkor a "roll" mozgás egészen furcsa
+			- ezért valahogy azt kellene szimulálni, hogy a rotation-t a hmd két szemem közti centeren végezném
+			- ez egy eltolás, egy rotáció, majd egy visszatolás
+			- ehhez kell hozzáadni a forward-right-up elmozdulásokat...
+				- ez úgy tűnik ok, de az elején valamiért a chaperone position leugrik, egyből a földszintre esek...
+		- a VR posInfo alapján kiderült, hogy eddig teljesen kihagytam a yaw mozgást, azaz bólintást egyáltalán nem számolok
+			- ez érdekes probléma megint
+			- ha letámasztom a controllert az asztalon, és mozgatom a fejem, akkor a lefthand controller position és rotation értékei magmaradnak
+				- de ha mozgok a térben (azaz a Player position-t mozgatom), akkor ugyanannyival mozdul el a lefthand controller position értéke is
+			- tehát, ha eltárolom a start-kor a hmdPosition-t és a lefthand position-t (plusz rotációt), akkor 
+				- a tényleges térbeli lefthand elmozdulás= (lefthand position - startlefthand position - (hmdPos-hmdPosStart))
+			- CONTORLLER INFO: fix controller pozíció mellett (az asztalon fix-en mozdulatlan)
+				- ha mozgatom a fejem, akkor a lekérdezhető controller pozíció és rotáció nem változik
+				- ha mozgatom a hmd.transform.position-t, akkor a lekérdezhető controller pozíció pontosan annyival változik, mint amennyivel a hmd.transform.position
+				- azaz a controller igazi worldspace koordináta és rotáció

@@ -102,7 +102,7 @@ public class ScriptNavigationSphere : MonoBehaviour
             }
             else
             {
-                float deltaTime = Time.deltaTime;
+                float deltaTime = Time.deltaTime/10f;
 
                 Vector3 diffCenter = posNavSphereCenter - this.posNavSphereCenterStart;
                 // dot product kell ahhoz, hogy egy vektor adott irányú komponensét határozzam meg
@@ -130,16 +130,18 @@ public class ScriptNavigationSphere : MonoBehaviour
                 Quaternion quatTmp2 = Quaternion.Lerp( Quaternion.identity,quatTmp1,deltaTime );
                 //if ( countUpdates%50==0 ) Debug.Log( string.Format( "quatTmp2 ({0},{1},{2},{3})",quatTmp2.x,quatTmp2.y,quatTmp2.z,quatTmp2.w ) );
 
-                this.transform.rotation *= quatTmp2;
+                //this.transform.rotation *= quatTmp2;
                 //if ( countUpdates%50==0 ) Debug.Log( string.Format( "rotation ({0},{1},{2},{3})",this.transform.rotation.x,this.transform.rotation.y,this.transform.rotation.z,this.transform.rotation.w ) );
 
-                //Vector3 vecForward = this.transform.rotation * Vector3.forward;
-                //Vector3 vecUp = this.transform.rotation * Vector3.up;
-                //Vector3 vecRight = this.transform.rotation * Vector3.right;
+                //this.transform.position += quatTmp2 * (-Player.instance.hmdTransform.position);
 
-                //this.transform.position += vecForward * velocityForward * deltaTime;
-                //this.transform.position += vecUp * velocityUp * deltaTime;
-                //this.transform.position += vecRight * velocityRight * deltaTime;
+                Vector3 vecForward = this.transform.rotation * Vector3.forward;
+                Vector3 vecUp = this.transform.rotation * Vector3.up;
+                Vector3 vecRight = this.transform.rotation * Vector3.right;
+
+                this.transform.position += vecForward * velocityForward * deltaTime;
+                this.transform.position += vecUp * velocityUp * deltaTime;
+                this.transform.position += vecRight * velocityRight * deltaTime;
             }
         }
         else
@@ -156,14 +158,33 @@ public class ScriptNavigationSphere : MonoBehaviour
 			objPosInfo = GameObject.FindGameObjectWithTag( "hudText" ).GetComponent<UnityEngine.UI.Text>();
 		}
 
+        Vector3 hmdTransform = Player.instance.hmdTransform.position;
+        Vector3 hmdRotation = Player.instance.hmdTransform.rotation.eulerAngles;
+        Vector3 chpTransform = ChaperoneInfo.instance.transform.position;
+        Vector3 chpRotation = ChaperoneInfo.instance.transform.rotation.eulerAngles;
+        Vector3 lhandTransform = Player.instance.leftHand.transform.position;
+        Vector3 lhandRotation = Player.instance.leftHand.transform.rotation.eulerAngles;
+
 		objPosInfo.text = string.Format( 
 			"counter:{0}\n" + 
 			"position:{1,0:F2},{2,0:F2},{3,0:F2}\n" +
 			"anglesNavSphere: {4,0:F6} {5,0:F6} {6,0:F6}\n" +
-			"velocity f:{7,0:F6} u:{8,0:F6} r:{9,0:F6}\n",
+			"velocity f:{7,0:F6} u:{8,0:F6} r:{9,0:F6}\n" +
+            "hmdPos:{10,0:F6},{11,0:F6},{12,0:F6}\n" +
+            "hmdRot:{13,0:F6},{14,0:F6},{15,0:F6}\n" +
+            "chpPos:{16,0:F6},{17,0:F6},{18,0:F6}\n" +
+            "chpRot:{19,0:F6},{20,0:F6},{21,0:F6}\n" +
+            "lhandPos:{22,0:F6},{23,0:F6},{24,0:F6}\n" +
+            "lhandRot:{25,0:F6},{26,0:F6},{27,0:F6}\n",
 			countUpdates,
 			transform.position.x,transform.position.y,transform.position.z,
             anglesNavSphere.x,anglesNavSphere.y,anglesNavSphere.z,
-            velocityForward,velocityUp,velocityRight );
+            velocityForward,velocityUp,velocityRight,
+            hmdTransform.x,hmdTransform.y,hmdTransform.z,
+            hmdRotation.x,hmdRotation.y,hmdRotation.z,
+            chpTransform.x,chpTransform.y,chpTransform.z,
+            chpRotation.x,chpRotation.y,chpRotation.z,
+            lhandTransform.x,lhandTransform.y,lhandTransform.z,
+            lhandRotation.x,lhandRotation.y,lhandRotation.z );
 	}
 }
