@@ -9,6 +9,8 @@ public class ScriptNavigationSphere : MonoBehaviour
     public SteamVR_Action_Boolean inputNavSphereLeftStart;
     public SteamVR_Action_Boolean inputNavSphereRightStart;
 
+	private UnityEngine.UI.Text objPosInfo;
+
     private Vector3 posNavSphereStartLeft;
     private Vector3 posNavSphereStartRight;
 
@@ -20,6 +22,11 @@ public class ScriptNavigationSphere : MonoBehaviour
     private float magnitudeNavSphereStart;
     private Quaternion quatNavSphereCenterStart;
 
+    private Vector3 anglesNavSphere;
+    private float velocityForward;
+    private float velocityUp;
+    private float velocityRight;
+
     private int status = 0;
     private int countUpdates = 0;
 
@@ -27,7 +34,7 @@ public class ScriptNavigationSphere : MonoBehaviour
     void Update()
     {
         // az irányításhoz az kell, hogy a chaperone-hoz viszonyítva kapjam meg, így tudom csak jól számolni a gyorsulás értékeket, még ha körbenézek is
-        //if ( inputNavSphereLeftStart.state==true && inputNavSphereRightStart.state==true )
+        if ( inputNavSphereLeftStart.state==true && inputNavSphereRightStart.state==true )
         {
             if ( this.status==0 )
                 countUpdates = 0;
@@ -39,6 +46,7 @@ public class ScriptNavigationSphere : MonoBehaviour
             Vector3 posNavSphereCenter = ( posNavSphereLeft + posNavSphereRight )/2;
             Vector3 diffLeftToRight = posNavSphereRight - posNavSphereLeft;
             Vector3 diffLeftToRightNorm = diffLeftToRight.normalized;
+            /*
             if ( countUpdates==0 )
             {
                 this.magnitudeNavSphereStart = diffLeftToRight.magnitude;
@@ -54,8 +62,8 @@ public class ScriptNavigationSphere : MonoBehaviour
             {
                 posNavSphereLeft = this.posNavSphereStartLeft;
                 posNavSphereRight = this.posNavSphereStartRight;
-                posNavSphereLeft.z = this.posNavSphereStartLeft.z + 0.9f;
-                posNavSphereRight.z = this.posNavSphereStartRight.z - 0.9f;
+                posNavSphereLeft.z = this.posNavSphereStartLeft.z + 0.1f;
+                posNavSphereRight.z = this.posNavSphereStartRight.z - 0.1f;
             }
             if ( countUpdates>=2000 )
             {
@@ -65,6 +73,7 @@ public class ScriptNavigationSphere : MonoBehaviour
             posNavSphereCenter = ( posNavSphereLeft + posNavSphereRight )/2;
             diffLeftToRight = posNavSphereRight - posNavSphereLeft;
             diffLeftToRightNorm = diffLeftToRight.normalized;
+            */
 
             if ( this.status==0 )
             {
@@ -100,9 +109,9 @@ public class ScriptNavigationSphere : MonoBehaviour
                 //Vector3 diffForward = this.dirNavSphereStartForwardNorm * Vector3.Dot( this.dirNavSphereStartForwardNorm,diffCenter );
                 //Vector3 diffRight = this.dirNavSphereStartRightNorm * Vector3.Dot( this.dirNavSphereStartRightNorm,diffCenter );
                 //Vector3 diffUp = this.dirNavSphereStartUpNorm * Vector3.Dot( this.dirNavSphereStartUpNorm,diffCenter );
-                float velocityForward = Vector3.Dot( this.dirNavSphereStartForwardNorm,diffCenter );
-                float velocityUp = Vector3.Dot( this.dirNavSphereStartUpNorm,diffCenter );
-                float velocityRight = Vector3.Dot( this.dirNavSphereStartRightNorm,diffCenter );
+                this.velocityForward = Vector3.Dot( this.dirNavSphereStartForwardNorm,diffCenter );
+                this.velocityUp = Vector3.Dot( this.dirNavSphereStartUpNorm,diffCenter );
+                this.velocityRight = Vector3.Dot( this.dirNavSphereStartRightNorm,diffCenter );
 
                 // 2 quaternion diff-jét kell kiszámolni, majd ezzel kell megszorozni a hmd rotation-jét
                 // https://forum.unity.com/threads/get-the-difference-between-two-quaternions-and-add-it-to-another-quaternion.513187/
@@ -115,27 +124,46 @@ public class ScriptNavigationSphere : MonoBehaviour
 
                 // ez is van: https://answers.unity.com/questions/35541/problem-finding-relative-rotation-from-one-quatern.html                
                 Quaternion quatTmp1 = Quaternion.Inverse( this.quatNavSphereCenterStart ) * quatNavSphere;
-                if ( countUpdates%50==0 ) Debug.Log( string.Format( "quatTmp1 ({0},{1},{2},{3})",quatTmp1.x,quatTmp1.y,quatTmp1.z,quatTmp1.w ) );
-                Vector3 anglesNavSphere = quatNavSphere.eulerAngles;
+                //if ( countUpdates%50==0 ) Debug.Log( string.Format( "quatTmp1 ({0},{1},{2},{3})",quatTmp1.x,quatTmp1.y,quatTmp1.z,quatTmp1.w ) );
+                this.anglesNavSphere = quatNavSphere.eulerAngles;
 
-                Quaternion quatTmp2 = Quaternion.Lerp( Quaternion.identity,quatTmp1,deltaTime/10f );
-                if ( countUpdates%50==0 ) Debug.Log( string.Format( "quatTmp2 ({0},{1},{2},{3})",quatTmp2.x,quatTmp2.y,quatTmp2.z,quatTmp2.w ) );
+                Quaternion quatTmp2 = Quaternion.Lerp( Quaternion.identity,quatTmp1,deltaTime );
+                //if ( countUpdates%50==0 ) Debug.Log( string.Format( "quatTmp2 ({0},{1},{2},{3})",quatTmp2.x,quatTmp2.y,quatTmp2.z,quatTmp2.w ) );
 
                 this.transform.rotation *= quatTmp2;
-                if ( countUpdates%50==0 ) Debug.Log( string.Format( "rotation ({0},{1},{2},{3})",this.transform.rotation.x,this.transform.rotation.y,this.transform.rotation.z,this.transform.rotation.w ) );
+                //if ( countUpdates%50==0 ) Debug.Log( string.Format( "rotation ({0},{1},{2},{3})",this.transform.rotation.x,this.transform.rotation.y,this.transform.rotation.z,this.transform.rotation.w ) );
 
-                Vector3 vecForward = this.transform.rotation * Vector3.forward;
-                Vector3 vecUp = this.transform.rotation * Vector3.up;
-                Vector3 vecRight = this.transform.rotation * Vector3.right;
+                //Vector3 vecForward = this.transform.rotation * Vector3.forward;
+                //Vector3 vecUp = this.transform.rotation * Vector3.up;
+                //Vector3 vecRight = this.transform.rotation * Vector3.right;
 
-                this.transform.position += vecForward * velocityForward * deltaTime;
-                this.transform.position += vecUp * velocityUp * deltaTime;
-                this.transform.position += vecRight * velocityRight * deltaTime;
+                //this.transform.position += vecForward * velocityForward * deltaTime;
+                //this.transform.position += vecUp * velocityUp * deltaTime;
+                //this.transform.position += vecRight * velocityRight * deltaTime;
             }
         }
-        //else
-        //{
-        //    this.status = 0;
-        //}
+        else
+        {
+            this.status = 0;
+        }
+        updatePosInfo();
     }
+
+	private void updatePosInfo()
+	{
+		if ( objPosInfo==null )
+		{
+			objPosInfo = GameObject.FindGameObjectWithTag( "hudText" ).GetComponent<UnityEngine.UI.Text>();
+		}
+
+		objPosInfo.text = string.Format( 
+			"counter:{0}\n" + 
+			"position:{1,0:F2},{2,0:F2},{3,0:F2}\n" +
+			"anglesNavSphere: {4,0:F6} {5,0:F6} {6,0:F6}\n" +
+			"velocity f:{7,0:F6} u:{8,0:F6} r:{9,0:F6}\n",
+			countUpdates,
+			transform.position.x,transform.position.y,transform.position.z,
+            anglesNavSphere.x,anglesNavSphere.y,anglesNavSphere.z,
+            velocityForward,velocityUp,velocityRight );
+	}
 }
