@@ -33,6 +33,7 @@ public class ScriptNavigationSphere : MonoBehaviour
     private float velocityForward = 0f;
     private float velocityUp = 0f;
     private float velocityRight = 0f;
+    private Vector3 posRotDiff;
 
     private int status = 0;
     private int countUpdates = 0;
@@ -99,8 +100,16 @@ public class ScriptNavigationSphere : MonoBehaviour
 
         Quaternion quatTmp2 = Quaternion.Lerp( Quaternion.identity,diffLeftHandQuat,deltaTime );
 
-        this.transform.position += quatTmp2 * (-Player.instance.hmdTransform.position);
-        this.transform.rotation *= quatTmp2;
+        Matrix4x4 m4rot = Matrix4x4.Rotate( quatTmp2 );
+        Matrix4x4 m4trans1 = Matrix4x4.Translate( Player.instance.hmdTransform.position );
+        Matrix4x4 m4trans2 = Matrix4x4.Translate( -Player.instance.hmdTransform.position );
+
+        Matrix4x4 m4full = (m4trans1 * m4rot) * m4trans2;
+
+        this.transform.rotation *= m4full.rotation;
+        this.transform.position = m4full.MultiplyPoint3x4( this.transform.position );
+        //this.posRotDiff = (quatTmp2 * (-Player.instance.hmdTransform.position)) + Player.instance.hmdTransform.position;
+        //this.transform.position += ( this.posRotDiff-Player.instance.hmdTransform.position );
     }
 
     void NavUpdatePositionAndRotationOld()
@@ -234,8 +243,8 @@ public class ScriptNavigationSphere : MonoBehaviour
 
         Vector3 hmdTransform = Player.instance.hmdTransform.position;
         Vector3 hmdRotation = Player.instance.hmdTransform.rotation.eulerAngles;
-        Vector3 chpTransform = ChaperoneInfo.instance.transform.position;
-        Vector3 chpRotation = ChaperoneInfo.instance.transform.rotation.eulerAngles;
+        Vector3 chpTransform = this.transform.position;
+        Vector3 chpRotation = this.transform.rotation.eulerAngles;
         Vector3 lhandTransform = Player.instance.leftHand.transform.position;
         Vector3 lhandRotation = Player.instance.leftHand.transform.rotation.eulerAngles;
 
@@ -249,7 +258,8 @@ public class ScriptNavigationSphere : MonoBehaviour
             "chpPos:{16,0:F6},{17,0:F6},{18,0:F6}\n" +
             "chpRot:{19,0:F6},{20,0:F6},{21,0:F6}\n" +
             "lhandPos:{22,0:F6},{23,0:F6},{24,0:F6}\n" +
-            "lhandRot:{25,0:F6},{26,0:F6},{27,0:F6}\n",
+            "lhandRot:{25,0:F6},{26,0:F6},{27,0:F6}\n" +
+            "posRotDiff:{28,0:F6},{29,0:F6},{30,0:F6}\n",
 			countUpdates,
 			transform.position.x,transform.position.y,transform.position.z,
             anglesNavSphere.x,anglesNavSphere.y,anglesNavSphere.z,
@@ -259,6 +269,7 @@ public class ScriptNavigationSphere : MonoBehaviour
             chpTransform.x,chpTransform.y,chpTransform.z,
             chpRotation.x,chpRotation.y,chpRotation.z,
             lhandTransform.x,lhandTransform.y,lhandTransform.z,
-            lhandRotation.x,lhandRotation.y,lhandRotation.z );
+            lhandRotation.x,lhandRotation.y,lhandRotation.z,
+            posRotDiff.x,posRotDiff.y,posRotDiff.z );
 	}
 }
