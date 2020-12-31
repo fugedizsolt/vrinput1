@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,7 +20,6 @@ public class ScriptNavigationSphere : MonoBehaviour
     private Vector3 dirNavSphereStartForwardNorm;
     private Vector3 dirNavSphereStartRightNorm;
     private Vector3 dirNavSphereStartUpNorm;
-    private float magnitudeNavSphereStart;
     private Quaternion quatNavSphereCenterStart;
 
     // ezek world coord értékek
@@ -27,11 +27,12 @@ public class ScriptNavigationSphere : MonoBehaviour
     private Quaternion quatChaperonedAtStart;
     private Vector3 posLeftHandAtStart;
     private Quaternion quatLeftHanddAtStart;
+    private float magnitudeNavSphereStart;
 
     private Vector3 anglesNavSphere;
-    private float velocityForward;
-    private float velocityUp;
-    private float velocityRight;
+    private float velocityForward = 0f;
+    private float velocityUp = 0f;
+    private float velocityRight = 0f;
 
     private int status = 0;
     private int countUpdates = 0;
@@ -39,8 +40,75 @@ public class ScriptNavigationSphere : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if ( IsNavTriggered()==true )
+        {
+            if ( IsNavStarted()==false )
+            {
+                NavStart();
+            }
+            else
+            {
+                NavUpdatePositionAndRotation();
+            }
+        }
+        else
+        {
+            NavEnd();
+        }
+        updateHUDPosInfo();
+    }
+
+    private void NavStart()
+    {
+        countUpdates = 0;
+
+        this.posChaperonedAtStart = this.transform.position;
+        this.posLeftHandAtStart = Player.instance.leftHand.transform.position;
+
+        this.quatChaperonedAtStart = this.transform.rotation;
+        this.quatLeftHanddAtStart = Player.instance.leftHand.transform.rotation;
+    }
+
+    private void NavEnd()
+    {
+        this.status = 0;
+    }
+
+    private bool IsNavStarted()
+    {
+        return ( inputNavSphereLeftStart.state==true || inputNavSphereRightStart.state==true );
+    }
+
+    private bool IsNavTriggered()
+    {
+        return ( this.status==0 );
+    }
+
+    void NavUpdatePositionAndRotation()
+    {
+        float deltaTime = Time.deltaTime;
+
+        Vector3 diffChaperonePos = this.transform.position - this.posChaperonedAtStart;
+        Vector3 diffLeftHandPos = Player.instance.leftHand.transform.position - this.posLeftHandAtStart - diffChaperonePos;
+
+        Quaternion diffChaperoneQuat = Quaternion.Inverse( this.quatChaperonedAtStart ) * this.transform.rotation;
+        Quaternion diffLeftHandQuatTmp1 = Quaternion.Inverse( this.quatLeftHanddAtStart ) * Player.instance.leftHand.transform.rotation;
+        Quaternion diffLeftHandQuat = Quaternion.Inverse( diffChaperoneQuat ) * diffLeftHandQuatTmp1;
+
+        this.anglesNavSphere = diffLeftHandQuat.eulerAngles;
+
+        Quaternion quatTmp2 = Quaternion.Lerp( Quaternion.identity,diffLeftHandQuat,deltaTime );
+
+        this.transform.position += quatTmp2 * (-Player.instance.hmdTransform.position);
+        this.transform.rotation *= quatTmp2;
+    }
+
+    void NavUpdatePositionAndRotationOld()
+    {
+        countUpdates++;
         // az irányításhoz az kell, hogy a chaperone-hoz viszonyítva kapjam meg, így tudom csak jól számolni a gyorsulás értékeket, még ha körbenézek is
-        if ( inputNavSphereLeftStart.state==true && inputNavSphereRightStart.state==true )
+        //if ( inputNavSphereLeftStart.state==true && inputNavSphereRightStart.state==true )
+        if ( inputNavSphereLeftStart.state==true || inputNavSphereRightStart.state==true )
         {
             if ( this.status==0 )
                 countUpdates = 0;
@@ -83,9 +151,6 @@ public class ScriptNavigationSphere : MonoBehaviour
 
             if ( this.status==0 )
             {
-                this.posWorldCoordAtStart = this.transform.position;
-                this.quatWorldCoordAtStart = this.transform.rotation;
-
                 this.magnitudeNavSphereStart = diffLeftToRight.magnitude;
 
                 this.posNavSphereStartLeft = posNavSphereLeft;
@@ -157,10 +222,10 @@ public class ScriptNavigationSphere : MonoBehaviour
         {
             this.status = 0;
         }
-        updatePosInfo();
+        updateHUDPosInfo();
     }
 
-	private void updatePosInfo()
+	private void updateHUDPosInfo()
 	{
 		if ( objPosInfo==null )
 		{
