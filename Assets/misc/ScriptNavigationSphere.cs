@@ -22,6 +22,12 @@ public class ScriptNavigationSphere : MonoBehaviour
     private float magnitudeNavSphereStart;
     private Quaternion quatNavSphereCenterStart;
 
+    // ezek world coord értékek
+    private Vector3 posChaperonedAtStart;
+    private Quaternion quatChaperonedAtStart;
+    private Vector3 posLeftHandAtStart;
+    private Quaternion quatLeftHanddAtStart;
+
     private Vector3 anglesNavSphere;
     private float velocityForward;
     private float velocityUp;
@@ -41,8 +47,8 @@ public class ScriptNavigationSphere : MonoBehaviour
             else
                 countUpdates++;
 
-            Vector3 posNavSphereLeft = Player.instance.leftHand.transform.position - Player.instance.hmdTransform.position;
-            Vector3 posNavSphereRight = Player.instance.rightHand.transform.position - Player.instance.hmdTransform.position;
+            Vector3 posNavSphereLeft = Player.instance.leftHand.transform.position - this.transform.position;
+            Vector3 posNavSphereRight = Player.instance.rightHand.transform.position - this.transform.position;
             Vector3 posNavSphereCenter = ( posNavSphereLeft + posNavSphereRight )/2;
             Vector3 diffLeftToRight = posNavSphereRight - posNavSphereLeft;
             Vector3 diffLeftToRightNorm = diffLeftToRight.normalized;
@@ -77,6 +83,9 @@ public class ScriptNavigationSphere : MonoBehaviour
 
             if ( this.status==0 )
             {
+                this.posWorldCoordAtStart = this.transform.position;
+                this.quatWorldCoordAtStart = this.transform.rotation;
+
                 this.magnitudeNavSphereStart = diffLeftToRight.magnitude;
 
                 this.posNavSphereStartLeft = posNavSphereLeft;
