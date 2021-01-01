@@ -30,3 +30,15 @@
 				- ha mozgatom a fejem, akkor a lekérdezhető controller pozíció és rotáció nem változik
 				- ha mozgatom a hmd.transform.position-t, akkor a lekérdezhető controller pozíció pontosan annyival változik, mint amennyivel a hmd.transform.position
 				- azaz a controller igazi worldspace koordináta és rotáció
+
+20210101:
+	- hihetetlen
+	- VR nélkül szépen megy minden, de VR-ban mintha rossz helyen lenne a hmd
+	- a lefthand controller diff értékei szépen olvashatók
+	- ezt nem hiszem el:
+		- a vr prg-ben kiírtam a chp-hmd és chp-hand position diff-et
+		- szépen látszott, hogy hiába mozgott a chp, a hmd és a hand relativ pos-ok szépen ugyanazok
+		- az is látszott, hogy a hmd-hand InverseTransformPoint fgv valami furcsa értéket ad, ha forgatom a controllert, tök más értékeket ad, szóval ezt nem lehet használni (egyenlőre)
+		- az is látszott, hogy ha z tengely körül forgok (controllert jobbra-balra csavargatom), akkor a chp y koord kb ugyanaz marad, az x koord nagyon mozog
+			- és valahogy a chp 0,0,0 pozíciója körül foroghat a hmd-ben a világ...
+			- ez lehetetlen, mert ugyanezt szimuláltam nem-vr-ben... el sem tudom képzelni mi lehet a hiba...
