@@ -100,14 +100,15 @@ public class ScriptNavigationSphere : MonoBehaviour
 
         Quaternion quatTmp2 = Quaternion.Lerp( Quaternion.identity,diffLeftHandQuat,deltaTime );
 
+        Vector3 vecHmdTranslation = this.transform.position - Player.instance.hmdTransform.position;
         Matrix4x4 m4rot = Matrix4x4.Rotate( quatTmp2 );
-        Matrix4x4 m4trans1 = Matrix4x4.Translate( Player.instance.hmdTransform.position );
-        Matrix4x4 m4trans2 = Matrix4x4.Translate( -Player.instance.hmdTransform.position );
+        Matrix4x4 m4trans1 = Matrix4x4.Translate( vecHmdTranslation );
+        Matrix4x4 m4trans2 = Matrix4x4.Translate( -vecHmdTranslation );
 
         Matrix4x4 m4full = (m4trans1 * m4rot) * m4trans2;
 
         this.transform.rotation *= m4full.rotation;
-        this.transform.position = m4full.MultiplyPoint3x4( this.transform.position );
+        this.transform.position += m4full.GetPosition();
         //this.posRotDiff = (quatTmp2 * (-Player.instance.hmdTransform.position)) + Player.instance.hmdTransform.position;
         //this.transform.position += ( this.posRotDiff-Player.instance.hmdTransform.position );
     }
