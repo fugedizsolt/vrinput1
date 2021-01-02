@@ -13,7 +13,7 @@ public class ScriptNavigationSphere : MonoBehaviour
     public GameObject gameObjLeftHand;
     public GameObject gameObjHmd;
 
-	private UnityEngine.UI.Text objPosInfo;
+	public UnityEngine.UI.Text objPosInfo;
 
     // ezek world coord értékek
     private Vector3 posLeftHandRelativeToChaperoneAtStart;
@@ -56,8 +56,10 @@ public class ScriptNavigationSphere : MonoBehaviour
         countUpdates = 0;
 
         // start esetén eltárolom a chaperone-hoz relatív position-t és rotation-t
-        this.posLeftHandRelativeToChaperoneAtStart = MyInverseTransformPoint( this.transform,this.gameObjLeftHand.transform.position );
-        this.quatLeftHandRelativeToChaperoneAtStart =  Quaternion.Inverse( this.transform.rotation ) * this.gameObjLeftHand.transform.rotation;
+        //this.posLeftHandRelativeToChaperoneAtStart = MyInverseTransformPoint( this.transform,this.gameObjLeftHand.transform.position );
+        //this.quatLeftHandRelativeToChaperoneAtStart =  Quaternion.Inverse( this.transform.rotation ) * this.gameObjLeftHand.transform.rotation;
+        this.posLeftHandRelativeToChaperoneAtStart = this.gameObjLeftHand.transform.localPosition;
+        this.quatLeftHandRelativeToChaperoneAtStart = this.gameObjLeftHand.transform.localRotation;
     }
 
     private void NavEnd()
@@ -79,56 +81,44 @@ public class ScriptNavigationSphere : MonoBehaviour
     {
         float deltaTime = Time.deltaTime;
 
-        // először kiszámolom a chaperone-hoz relatív position-t és rotation-t
-        Vector3 currentRelativePosDiffLeftHandChaperone = MyInverseTransformPoint( this.transform,this.gameObjLeftHand.transform.position );
-        Quaternion currentRelativeQuatDiffLeftHandChaperone = Quaternion.Inverse( this.transform.rotation ) * this.gameObjLeftHand.transform.rotation;
-
-        // transzláció számolása:
-        Vector3 diffLeftHandChaperone = currentRelativePosDiffLeftHandChaperone - this.posLeftHandRelativeToChaperoneAtStart;
-        Vector3 diffLeftHandChaperoneLerp = diffLeftHandChaperone * deltaTime;
-
-        // rotáció számolása:
-        //   kiszámolom az aktuális és a startnál tárolt rotation közti különbséget
-        //Quaternion quatTmp1 = Quaternion.Inverse( this.quatLeftHandRelativeToChaperoneAtStart ) * currentRelativeQuatDiffLeftHandChaperone;
-        //Quaternion quatTmp1 = Quaternion.Euler( diffLeftHandChaperone.x*40,diffLeftHandChaperone.y*40,diffLeftHandChaperone.z*40 );
-        Quaternion quatTmp1 = Quaternion.Euler( 0,0,diffLeftHandChaperone.x*100 );
-        //   ehhez képest a deltaTime rotiációt
+        Quaternion quatTmp1 = this.gameObjLeftHand.transform.localRotation;
         Quaternion quatTmp2 = Quaternion.Lerp( Quaternion.identity,quatTmp1,deltaTime );
 
-        // ezután meg kell határozni azt a chaperone eltolást(transzlációt), amely a hmd-ben történő rotáció miatt éri a chaperone-t
-        Vector3 diffHmdChaperone = MyInverseTransformPoint( this.transform,this.gameObjHmd.transform.position );
-        Vector3 diffRotHmdChaperone = quatTmp2 * diffHmdChaperone - diffHmdChaperone;
+        Vector3 savedHdmWorldPos = this.gameObjHmd.transform.position;
 
         this.transform.rotation *= quatTmp2;
-        this.transform.position += diffRotHmdChaperone;
+
+        // kiszámolom az új rotációval a chp-ben a hmd helyzetét és eltolom a chp-t úgy, hogy a hmd 1 helyben kell maradjon
+        //Vector3 newHdmWorldPos = this.transform.position + this.transform.rotation * this.gameObjHmd.transform.localPosition;
+        Vector3 newHdmWorldPos = this.gameObjHmd.transform.position;
+        this.transform.position -= ( newHdmWorldPos - savedHdmWorldPos );
+
+        // transzláció kezelés
+        // először kiszámolom a chaperone-hoz viszonyított transzlációt, minusz a default érték
+        Vector3 diffLeftHandChaperone = this.gameObjLeftHand.transform.localPosition - this.posLeftHandRelativeToChaperoneAtStart;
+        Vector3 diffLeftHandChaperoneLerp = diffLeftHandChaperone * deltaTime;
 
         Vector3 vecAdd = this.transform.rotation * diffLeftHandChaperoneLerp;
-        //this.transform.position += vecAdd;
+        this.transform.position += vecAdd;
 
         this.debugDiffPosLeftHandFromStart = diffLeftHandChaperone;
         this.debugDiffAnglesLeftHandFromStart = quatTmp1.eulerAngles;
     }
-
+/*
     private Vector3 MyInverseTransformPoint( Transform transform,Vector3 worldCoordPos )
     {
         Vector3 diff = ( worldCoordPos - transform.position );
         return Quaternion.Inverse( transform.rotation ) * diff;
     }
-
+*/
     private int indexFormat = 0;
     private string strFormat;
     private object[] objsFormat = new object[100];
 	private void updateHUDPosInfo()
 	{
-		if ( objPosInfo==null )
-		{
-			objPosInfo = GameObject.FindGameObjectWithTag( "hudText" ).GetComponent<UnityEngine.UI.Text>();
-		}
-
-        Vector3 pos1 = MyInverseTransformPoint( this.transform,this.gameObjLeftHand.transform.position );
-        Vector3 pos2 = MyInverseTransformPoint( this.transform,this.gameObjHmd.transform.position );
-        Vector3 pos3 = MyInverseTransformPoint( this.gameObjLeftHand.transform,this.gameObjHmd.transform.position );
-        Vector3 pos4 = pos1 - this.posLeftHandRelativeToChaperoneAtStart;
+        Vector3 pos1 = this.gameObjLeftHand.transform.localPosition;
+        Vector3 pos2 = this.gameObjHmd.transform.localPosition;
+        Vector3 pos3 = pos1 - this.posLeftHandRelativeToChaperoneAtStart;
 
         Vector3 hmdTransform = this.gameObjHmd.transform.position;
         Vector3 hmdRotation = this.gameObjHmd.transform.rotation.eulerAngles;
@@ -145,8 +135,7 @@ public class ScriptNavigationSphere : MonoBehaviour
         addVector3( "diffAngles:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.debugDiffAnglesLeftHandFromStart );
         addVector3( "invChpHand:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",pos1 );
         addVector3( "invChpHmd:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",pos2 );
-        addVector3( "invHandHmd:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",pos3 );
-        addObj( "diffHandChpX:{{{0}}}\n",pos4.x*100 );
+        addObj( "diffHandChpX:{{{0}}}\n",pos3.x*100 );
         //addVector3( "diffHandChp:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",pos4 );
 
 		objPosInfo.text = string.Format( this.strFormat,this.objsFormat );

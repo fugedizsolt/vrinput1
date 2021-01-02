@@ -54,3 +54,9 @@
 				- transform.rotation*Vector3.Scale(myVector,transform.localScale) + transform.position;
 	- saját InverseTransformPoint-t készítek scale nélkül:
 		- ugyanaz az eredmény, nem ott fordul a chaperone, ahol kellene...
+	- KÉSZEN VAN!!! gyönyörűen működik az összes funkció, szépen mozgok a térben, ahogy szeretnék
+		- arányokon még módosítani kell, gyorsulásokat kezelni, de ez már csak részlet :)
+	- a lényeg az volt, hogy
+		- NEM SZÁMOLNI SEMMIYLEN relatív értéket (transzláció, rotáció), elég a localPosition és localRotation-höz viszonyítani a relatív mozgást
+		- ha egy adott objektumon pl rotációt módosítok, akkor az a child objektumokra egyből hat
+		- a chp pozíció-rotáció módosításakor tényleg csak a kamera elmozdulás worldCoord-ot kellett kompenzálni
