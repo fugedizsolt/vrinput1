@@ -42,3 +42,15 @@
 		- az is látszott, hogy ha z tengely körül forgok (controllert jobbra-balra csavargatom), akkor a chp y koord kb ugyanaz marad, az x koord nagyon mozog
 			- és valahogy a chp 0,0,0 pozíciója körül foroghat a hmd-ben a világ...
 			- ez lehetetlen, mert ugyanezt szimuláltam nem-vr-ben... el sem tudom képzelni mi lehet a hiba...
+
+20200102:
+	- jó tesztet találtam ki, csak 1 irányt nézek és simán a szöget állítom, nem quateriont
+	- matek a InverseTransformPoint és TransformPoint fgv mögött:
+		- https://forum.unity.com/threads/whats-the-math-behind-transform-transformpoint.107401/
+			- Transform.InverseTransformPoint math:
+				var diference = (GO.position - transform.position);
+				var FinalPos = Quaternion.Inverse(transform.rotation)*Vector3(diference.x / transform.lossyScale.x,diference.y / transform.lossyScale.y,diference.z / transform.lossyScale.z);
+			- transform.TransformPoint(myVector) math:
+				- transform.rotation*Vector3.Scale(myVector,transform.localScale) + transform.position;
+	- saját InverseTransformPoint-t készítek scale nélkül:
+		- ugyanaz az eredmény, nem ott fordul a chaperone, ahol kellene...
