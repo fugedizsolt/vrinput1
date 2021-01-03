@@ -579,9 +579,27 @@ MonoBehaviour:
   inputNavSphereRightStart:
     actionPath: /actions/default/in/navSphereRight
     needsReinit: 0
+  inputStopForwardMovement:
+    actionPath: /actions/default/in/stopForwardMovement
+    needsReinit: 0
+  inputStopSideMovement:
+    actionPath: /actions/default/in/stopSideMovement
+    needsReinit: 0
+  inputStopUpDownMovement:
+    actionPath: /actions/default/in/stopUpDownMovement
+    needsReinit: 0
+  inputStopAllMovement:
+    actionPath: /actions/default/in/stopAllMovement
+    needsReinit: 0
   gameObjLeftHand: {fileID: 1648003069}
   gameObjHmd: {fileID: 506583612}
   objPosInfo: {fileID: 830598434}
+  VELOCITY_MULT1: 1
+  MAX_ACCELERATION: 0.2
+  ACCELERATION_MULT1: 0.2
+  ANGULAR_VELOCITY_MULT: 1.5
+  TRANSLATION_DEADZONE: 0.02
+  TRANSLATION_POW_MULT1: 10
 --- !u!114 &1262973188 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 114000011273627542, guid: dc06161b6d97feb419f45f03b62e14b9,

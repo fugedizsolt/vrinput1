@@ -9,6 +9,10 @@ public class ScriptNavigationSphere : MonoBehaviour
 {
     public SteamVR_Action_Boolean inputNavSphereLeftStart;
     public SteamVR_Action_Boolean inputNavSphereRightStart;
+    public SteamVR_Action_Boolean inputStopForwardMovement;
+    public SteamVR_Action_Boolean inputStopSideMovement;
+    public SteamVR_Action_Boolean inputStopUpDownMovement;
+    public SteamVR_Action_Boolean inputStopAllMovement;
 
     public GameObject gameObjLeftHand;
     public GameObject gameObjHmd;
@@ -70,6 +74,7 @@ public class ScriptNavigationSphere : MonoBehaviour
         {
             if ( IsNavStarted()==true )
                 NavEnd();
+            ProcessInputStopMovements();
             NavUpdatePositionAndRotationWithoutAcceleration();
         }
         updateHUDPosInfo();
@@ -185,6 +190,14 @@ public class ScriptNavigationSphere : MonoBehaviour
 
         this.debugDiffPosLeftHandFromStart = Vector3.zero;
         this.debugDiffAnglesLeftHandFromStart = this.currentRotationAsAngleVelocity.eulerAngles;
+    }
+
+    void ProcessInputStopMovements()
+    {
+        if ( inputStopForwardMovement.state==true || inputStopSideMovement.state==true || inputStopUpDownMovement.state==true || inputStopAllMovement.state==true )
+        {
+            this.currentTranslationAsVelocity = Vector3.zero;
+        }
     }
 /*
     private Vector3 MyInverseTransformPoint( Transform transform,Vector3 worldCoordPos )

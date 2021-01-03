@@ -105,14 +105,6 @@ namespace Valve.VR
             }
         }
         
-        public virtual SteamVR_Action_Vector2 TouchPad
-        {
-            get
-            {
-                return SteamVR_Actions.default_TouchPad;
-            }
-        }
-        
         public virtual SteamVR_Action_Boolean jump1
         {
             get
@@ -134,6 +126,46 @@ namespace Valve.VR
             get
             {
                 return SteamVR_Actions.default_navSphereRight;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean stopForwardMovement
+        {
+            get
+            {
+                return SteamVR_Actions.default_stopForwardMovement;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean stopSideMovement
+        {
+            get
+            {
+                return SteamVR_Actions.default_stopSideMovement;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean stopUpDownMovement
+        {
+            get
+            {
+                return SteamVR_Actions.default_stopUpDownMovement;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean stopAllMovement
+        {
+            get
+            {
+                return SteamVR_Actions.default_stopAllMovement;
+            }
+        }
+        
+        public virtual SteamVR_Action_Vector2 TouchPad
+        {
+            get
+            {
+                return SteamVR_Actions.default_TouchPad;
             }
         }
         
