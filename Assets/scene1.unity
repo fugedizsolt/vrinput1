@@ -372,6 +372,16 @@ PrefabInstance:
       propertyPath: trackedObject
       value: 
       objectReference: {fileID: 1262973188}
+    - target: {fileID: 114000010591715100, guid: dc06161b6d97feb419f45f03b62e14b9,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000011734077242, guid: dc06161b6d97feb419f45f03b62e14b9,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
 --- !u!1 &387507200
@@ -689,6 +699,7 @@ MonoBehaviour:
   VELOCITY_MULT1: 1
   MAX_ACCELERATION: 0.2
   ACCELERATION_MULT1: 0.2
+  ACCELERATION_STOP_MULT2: 10
   ANGULAR_VELOCITY_MULT: 1.5
   TRANSLATION_DEADZONE: 0.02
   TRANSLATION_POW_MULT1: 10
