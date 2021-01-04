@@ -1,4 +1,4 @@
-using System;
+ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,19 +29,19 @@ public class ScriptNavigationSphereAcc : MonoBehaviour
     // ezek world coord értékek
     private Vector3 posLeftHandRelativeToChaperoneAtStart;
     private Quaternion quatLeftHandRelativeToChaperoneAtStart;
-    private float magnitudeNavSphereStart = 1.0f;   // jelenleg fix
+    //private float magnitudeNavSphereStart = 1.0f;   // jelenleg fix
 
     private Vector3 currentTranslationAsVelocity;
     private Vector3 currentTranslationAcceleration;
     private Vector3 targetTranslationAcceleration;
     private Quaternion currentRotationAsAngleVelocity;
-
+/*
     private Vector3 debugDiffPosLeftHandFromStart;
     private Vector3 debugDiffAnglesLeftHandFromStart;
     private float debugVelocityForward = 0f;
     private float debugVelocityUp = 0f;
     private float debugVelocityRight = 0f;
-
+*/
     private int status = 0;
     private int countUpdates = 0;
 
@@ -159,9 +159,6 @@ public class ScriptNavigationSphereAcc : MonoBehaviour
         }
         this.currentTranslationAsVelocity += this.currentTranslationAcceleration * (deltaTime);
         this.transform.position += (this.transform.rotation * this.currentTranslationAsVelocity) * (VELOCITY_MULT1*deltaTime);
-
-        this.debugDiffPosLeftHandFromStart = diffLeftHandChaperone;
-        this.debugDiffAnglesLeftHandFromStart = quatTmp1.eulerAngles;
     }
 
     void NavUpdatePositionAndRotationWithoutAcceleration()
@@ -187,9 +184,6 @@ public class ScriptNavigationSphereAcc : MonoBehaviour
         this.targetTranslationAcceleration = Vector3.zero;
         this.currentTranslationAcceleration = Vector3.zero;
         this.transform.position += (this.transform.rotation * this.currentTranslationAsVelocity) * (VELOCITY_MULT1*deltaTime);
-
-        this.debugDiffPosLeftHandFromStart = Vector3.zero;
-        this.debugDiffAnglesLeftHandFromStart = this.currentRotationAsAngleVelocity.eulerAngles;
     }
 
     void ProcessInputStopMovements()
@@ -226,8 +220,6 @@ public class ScriptNavigationSphereAcc : MonoBehaviour
         this.strFormat = "";
         addObj( "counter:{{{0}}}\n",countUpdates );
         addVector3( "position:{{{0},0:F2}} {{{1},0:F2}} {{{2},0:F2}}\n",this.transform.position );
-        addVector3( "diffPos:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.debugDiffPosLeftHandFromStart );
-        addVector3( "diffAngles:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.debugDiffAnglesLeftHandFromStart );
         addVector3( "velocity:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.currentTranslationAsVelocity );
         addVector3( "currentAcceleration:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.currentTranslationAcceleration );
         addVector3( "targetAcceleration:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.targetTranslationAcceleration );
