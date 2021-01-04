@@ -44,9 +44,9 @@ public class ScriptNavigationSphere : MonoBehaviour
     private float debugVelocityUp = 0f;
     private float debugVelocityRight = 0f;
 */
-    private int status = 0;
+    private int statusLeftHand = 0;
+    private int statusRightHand = 0;
     private bool stopRequested = false;
-    private int countUpdates = 0;
 
 
     // Start is called before the first frame update
@@ -56,64 +56,43 @@ public class ScriptNavigationSphere : MonoBehaviour
         this.savedTargetTranslationAsVelocityAtTrigger = Vector3.zero;
         this.targetTranslationAsVelocity = Vector3.zero;
         this.currentRotationAsAngleVelocity = Quaternion.identity;
-        this.translationPosMulti = TRANSLATION_POW_MULT1;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //this.transform.position -= new Vector3( 0,0,1 )/100f;
-        if ( IsNavTriggered()==true )
+        ProcessInputStopMovements();
+
+        if ( inputNavSphereLeftStart.state==true )
         {
-            if ( IsNavStarted()==false )
+            if ( this.statusLeftHand==0 )
             {
-                NavStart();
+                this.statusLeftHand = 1;
+                this.posLeftHandRelativeToChaperoneAtStart = this.gameObjLeftHand.transform.localPosition;
+                this.savedTargetTranslationAsVelocityAtTrigger = this.targetTranslationAsVelocity;
+                // csak az elején a triggerkor állítom
+                CalcTranslationPosMulti();
             }
-            else
+        }
+        if ( inputNavSphereRightStart.state==true )
+        {
+            if ( this.statusRightHand==0 )
             {
-                NavUpdatePositionAndRotationWithAcceleration();
+                this.statusRightHand = 1;
+                this.quatRightHandRelativeToChaperoneAtStart = this.gameObjRightHand.transform.localRotation;
             }
+        }
+        if ( inputNavSphereLeftStart.state==true || inputNavSphereRightStart.state==true )
+        {
+            NavUpdatePositionAndRotationWithAcceleration();
         }
         else
         {
-            if ( IsNavStarted()==true )
-                NavEnd();
-            ProcessInputStopMovements();
+            this.statusLeftHand = 0;
+            this.statusRightHand = 0;
             NavUpdatePositionAndRotationWithoutAcceleration();
         }
         updateHUDPosInfo();
-    }
-
-    private void NavStart()
-    {
-        this.status = 1;
-        countUpdates = 0;
-
-        // start esetén eltárolom a chaperone-hoz relatív position-t és rotation-t
-        if ( inputNavSphereLeftStart.state==true )
-        {
-            this.posLeftHandRelativeToChaperoneAtStart = this.gameObjLeftHand.transform.localPosition;
-            this.savedTargetTranslationAsVelocityAtTrigger = this.targetTranslationAsVelocity;
-            // csak az elején a triggerkor állítom
-            CalcTranslationPosMulti();
-        }
-        if ( inputNavSphereRightStart.state==true )
-            this.quatRightHandRelativeToChaperoneAtStart = this.gameObjRightHand.transform.localRotation;
-    }
-
-    private void NavEnd()
-    {
-        this.status = 0;
-    }
-
-    private bool IsNavTriggered()
-    {
-        return ( inputNavSphereLeftStart.state==true || inputNavSphereRightStart.state==true );
-    }
-
-    private bool IsNavStarted()
-    {
-        return ( this.status==1 );
     }
 
     void NavUpdatePositionAndRotationWithAcceleration()
@@ -171,12 +150,15 @@ public class ScriptNavigationSphere : MonoBehaviour
     {
         float diffTwoHands = (this.gameObjLeftHand.transform.localPosition - this.gameObjRightHand.transform.localPosition).magnitude;
         // ha 10 cm-n belül van a 2 kéz, akkor a minimum 2 az érték
-        // ha 50 m-ig fokozatosan nő a max 25-re az érték
+        // ha 50 m-ig fokozatosan nő a max 25-re az érték, négyzetesen jobb az átmenet
+        // közeli kis mozgásokhoz az 5-ös érték a jó, nagyobb mozgásokhoz 12-től felfele
+        // itt lehet megnézni a görbét: https://www.desmos.com/calculator/mryhlftxoy
         if ( diffTwoHands<=0.1f ) this.translationPosMulti = 2f;
         else if ( diffTwoHands>0.5f ) this.translationPosMulti = 25f;
         else
         {
-            this.translationPosMulti = 2f + 23f*( (diffTwoHands-0.1f)/0.4f );
+            float tmpx = ( (diffTwoHands-0.1f)/0.4f );
+            this.translationPosMulti = 2f + 23f * tmpx * tmpx;
         }
     }
 
@@ -270,7 +252,6 @@ public class ScriptNavigationSphere : MonoBehaviour
 */
         this.indexFormat = 0;
         this.strFormat = "";
-        addObj( "counter:{{{0}}}\n",countUpdates );
         addVector3( "position:{{{0},0:F2}} {{{1},0:F2}} {{{2},0:F2}}\n",this.transform.position );
         addVector3( "rotation:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.currentRotationAsAngleVelocity.eulerAngles );
         addVector3( "velocity:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.currentTranslationAsVelocity );

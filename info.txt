@@ -74,3 +74,8 @@
 		- a gyorsulásos ötlet nem igazán működik, ezért inkább target velocity-t állítok egy trigger-session alatt, amelyet hozzáadok az aktuálisan nyilvántartott sebességhez
 		- ha a triggert elengedem, akkor megmarad az aktuális sebesség érték és a target velocity is
 		- trigger-session alatt és elengedett trigger mellett is folyamatosan működik az aktuális sebesség állítása a target velocity fele
+	- elképesztő szívás volt, hogy a felületre kivezetett field-eknél az érvényesül, amelyik az editorban van beállítva, nem az, amelyik a kódban!!!
+	- a kétkezes irányítás nagyon bejött, így külön kézzel tudom irányítani a transzlációt és a rotációt, sokkal ügyesebben tudok navigálni
+	- a translationPowMulti értéke nagyon fontos, 5-ös érték körül nagyon pontosan szépen lehet navigálni vele, a gyorsulás nagyon összhangban van az aktuális sebességgel...
+		- talán lehetne még finomítani ezen
+	- furcsa néha a translationPowMulti érték, mintha nem pontosan kapnám meg

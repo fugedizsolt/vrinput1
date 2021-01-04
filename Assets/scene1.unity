@@ -384,6 +384,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
+--- !u!1 &314438746 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 160596, guid: dc06161b6d97feb419f45f03b62e14b9,
+    type: 3}
+  m_PrefabInstance: {fileID: 216276157}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &387507200
 GameObject:
   m_ObjectHideFlags: 0
@@ -694,15 +700,9 @@ MonoBehaviour:
     actionPath: /actions/default/in/stopAllMovement
     needsReinit: 0
   gameObjLeftHand: {fileID: 1648003069}
+  gameObjRightHand: {fileID: 314438746}
   gameObjHmd: {fileID: 506583612}
   objPosInfo: {fileID: 830598434}
-  VELOCITY_MULT1: 1
-  MAX_ACCELERATION: 0.2
-  ACCELERATION_MULT1: 0.2
-  ACCELERATION_STOP_MULT2: 10
-  ANGULAR_VELOCITY_MULT: 1.5
-  TRANSLATION_DEADZONE: 0.02
-  TRANSLATION_POW_MULT1: 10
 --- !u!114 &1262973188 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 114000011273627542, guid: dc06161b6d97feb419f45f03b62e14b9,
