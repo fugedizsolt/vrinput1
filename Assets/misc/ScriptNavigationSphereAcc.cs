@@ -5,7 +5,7 @@ using UnityEngine;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
 
-public class ScriptNavigationSphere : MonoBehaviour
+public class ScriptNavigationSphereAcc : MonoBehaviour
 {
     public SteamVR_Action_Boolean inputNavSphereLeftStart;
     public SteamVR_Action_Boolean inputNavSphereRightStart;
@@ -21,11 +21,10 @@ public class ScriptNavigationSphere : MonoBehaviour
 
     public float VELOCITY_MULT1 = 1f;
     public float MAX_ACCELERATION = 0.2f;
-    public float ACCELERATION_MULT1 = 0.1f;
-    public float ACCELERATION_STOP_MULT2 = 0.001f;
-    public float ANGULAR_VELOCITY_MULT = 0.5f;
+    public float ACCELERATION_MULT1 = 0.2f;
+    public float ANGULAR_VELOCITY_MULT = 1.5f;
     public float TRANSLATION_DEADZONE = 0.02f;
-    public float TRANSLATION_POW_MULT1 = 50f;
+    public float TRANSLATION_POW_MULT1 = 10f;
 
     // ezek world coord értékek
     private Vector3 posLeftHandRelativeToChaperoneAtStart;
@@ -33,8 +32,8 @@ public class ScriptNavigationSphere : MonoBehaviour
     private float magnitudeNavSphereStart = 1.0f;   // jelenleg fix
 
     private Vector3 currentTranslationAsVelocity;
-    private Vector3 savedTranslationAsVelocityAtTrigger;
-    private Vector3 targetTranslationAsVelocity;
+    private Vector3 currentTranslationAcceleration;
+    private Vector3 targetTranslationAcceleration;
     private Quaternion currentRotationAsAngleVelocity;
 
     private Vector3 debugDiffPosLeftHandFromStart;
@@ -44,7 +43,6 @@ public class ScriptNavigationSphere : MonoBehaviour
     private float debugVelocityRight = 0f;
 
     private int status = 0;
-    private bool stopRequested = false;
     private int countUpdates = 0;
 
 
@@ -52,8 +50,8 @@ public class ScriptNavigationSphere : MonoBehaviour
     void Start()
     {
         this.currentTranslationAsVelocity = Vector3.zero;
-        this.savedTranslationAsVelocityAtTrigger = Vector3.zero;
-        this.targetTranslationAsVelocity = Vector3.zero;
+        this.currentTranslationAcceleration = Vector3.zero;
+        this.targetTranslationAcceleration = Vector3.zero;
         this.currentRotationAsAngleVelocity = Quaternion.identity;
     }
 
@@ -90,7 +88,6 @@ public class ScriptNavigationSphere : MonoBehaviour
         // start esetén eltárolom a chaperone-hoz relatív position-t és rotation-t
         this.posLeftHandRelativeToChaperoneAtStart = this.gameObjLeftHand.transform.localPosition;
         this.quatLeftHandRelativeToChaperoneAtStart = this.gameObjLeftHand.transform.localRotation;
-        this.savedTranslationAsVelocityAtTrigger = this.currentTranslationAsVelocity;
     }
 
     private void NavEnd()
@@ -138,41 +135,33 @@ public class ScriptNavigationSphere : MonoBehaviour
         float diffLen = diffLeftHandChaperone.magnitude;
         if ( diffLen<TRANSLATION_DEADZONE )
             diffLen = 0;
-        if ( diffLen>1 )
-            diffLen = 1;
+        if ( diffLen>8 )
+            diffLen = 8;
         float accLen = Mathf.Pow( 2f,diffLen*TRANSLATION_POW_MULT1 )-1f;
-        Vector3 targetAddTranslationAsVelocity = diffLeftHandChaperone.normalized * accLen;
-        this.targetTranslationAsVelocity = targetAddTranslationAsVelocity + this.savedTranslationAsVelocityAtTrigger;
-        ModifyCurrentVelocity( deltaTime );
+        this.targetTranslationAcceleration = diffLeftHandChaperone.normalized * accLen;
+        Vector3 diffAcceleration = this.targetTranslationAcceleration - this.currentTranslationAcceleration;
+        Vector3 addVelocity = diffAcceleration * (deltaTime * ACCELERATION_MULT1);
+        if ( addVelocity.magnitude<0.01f )
+            addVelocity = addVelocity.normalized * 0.01f;
+        this.currentTranslationAcceleration += addVelocity;
 
+        float currentAccelerationVectorLength = this.currentTranslationAcceleration.magnitude;
+        float targetAccelerationVectorLength = this.targetTranslationAcceleration.magnitude;
+        if ( currentAccelerationVectorLength>targetAccelerationVectorLength )
+        {
+            this.currentTranslationAcceleration = this.targetTranslationAcceleration;
+            currentAccelerationVectorLength = targetAccelerationVectorLength;
+        }
+
+        if ( currentAccelerationVectorLength>MAX_ACCELERATION )
+        {
+            this.currentTranslationAcceleration = this.currentTranslationAcceleration.normalized * MAX_ACCELERATION;
+        }
+        this.currentTranslationAsVelocity += this.currentTranslationAcceleration * (deltaTime);
         this.transform.position += (this.transform.rotation * this.currentTranslationAsVelocity) * (VELOCITY_MULT1*deltaTime);
 
         this.debugDiffPosLeftHandFromStart = diffLeftHandChaperone;
         this.debugDiffAnglesLeftHandFromStart = quatTmp1.eulerAngles;
-    }
-
-    private void ModifyCurrentVelocity( float deltaTime )
-    {
-        Vector3 diffVelocity = this.targetTranslationAsVelocity - this.currentTranslationAsVelocity;
-        if ( diffVelocity.magnitude<0.01f )
-        {
-            this.currentTranslationAsVelocity = this.targetTranslationAsVelocity;
-        }
-        else
-        {
-            if ( diffVelocity.magnitude>1f )
-                diffVelocity = diffVelocity.normalized * 1f;
-            Vector3 addVelocity = diffVelocity * deltaTime;
-            if ( this.stopRequested==true )
-                this.currentTranslationAsVelocity += addVelocity * ACCELERATION_STOP_MULT2;
-            else
-                this.currentTranslationAsVelocity += addVelocity * ACCELERATION_MULT1;
-        }
-        if ( this.stopRequested==true && this.currentTranslationAsVelocity.magnitude<0.02 )
-        {
-            this.currentTranslationAsVelocity = Vector3.zero;
-            this.stopRequested = false;
-        }
     }
 
     void NavUpdatePositionAndRotationWithoutAcceleration()
@@ -194,7 +183,9 @@ public class ScriptNavigationSphere : MonoBehaviour
         this.transform.position -= ( newHdmWorldPos - savedHdmWorldPos );
 
         // transzláció kezelés
-        ModifyCurrentVelocity( deltaTime );
+        // először kiszámolom a chaperone-hoz viszonyított transzlációt, minusz a default érték
+        this.targetTranslationAcceleration = Vector3.zero;
+        this.currentTranslationAcceleration = Vector3.zero;
         this.transform.position += (this.transform.rotation * this.currentTranslationAsVelocity) * (VELOCITY_MULT1*deltaTime);
 
         this.debugDiffPosLeftHandFromStart = Vector3.zero;
@@ -205,10 +196,7 @@ public class ScriptNavigationSphere : MonoBehaviour
     {
         if ( inputStopForwardMovement.state==true || inputStopSideMovement.state==true || inputStopUpDownMovement.state==true || inputStopAllMovement.state==true )
         {
-            //this.currentTranslationAsVelocity = Vector3.zero;
-            this.currentRotationAsAngleVelocity = Quaternion.identity;
-            this.targetTranslationAsVelocity = Vector3.zero;
-            this.stopRequested = true;
+            this.currentTranslationAsVelocity = Vector3.zero;
         }
     }
 /*
@@ -241,7 +229,8 @@ public class ScriptNavigationSphere : MonoBehaviour
         addVector3( "diffPos:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.debugDiffPosLeftHandFromStart );
         addVector3( "diffAngles:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.debugDiffAnglesLeftHandFromStart );
         addVector3( "velocity:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.currentTranslationAsVelocity );
-        addVector3( "targetVelocity:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.targetTranslationAsVelocity );
+        addVector3( "currentAcceleration:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.currentTranslationAcceleration );
+        addVector3( "targetAcceleration:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",this.targetTranslationAcceleration );
         //addVector3( "invChpHand:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",pos1 );
         //addVector3( "invChpHmd:{{{0},0:F6}} {{{1},0:F6}} {{{2},0:F6}}\n",pos2 );
         //addObj( "diffHandChpX:{{{0}}}\n",pos3.x*100 );
